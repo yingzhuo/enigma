@@ -9,6 +9,7 @@ package enigma.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.convert.DurationUnit;
+import org.springframework.core.Ordered;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -22,12 +23,17 @@ import java.util.Set;
 public class EnigmaProperties {
 
     private boolean enabled = true;
-    private Set<String> excludeAntPatterns;
+
     private String nonceParameterName = "_nonce";
+
     private String timestampParameterName = "_timestamp";
+
     private String signParameterName = "_sign";
+
     @DurationUnit(ChronoUnit.MINUTES)
     private Duration maxAllowedTimestampDiff = null;
+
+    private Interceptor interceptor = new Interceptor();
 
     public boolean isEnabled() {
         return enabled;
@@ -35,14 +41,6 @@ public class EnigmaProperties {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-
-    public Set<String> getExcludeAntPatterns() {
-        return excludeAntPatterns;
-    }
-
-    public void setExcludeAntPatterns(Set<String> excludeAntPatterns) {
-        this.excludeAntPatterns = excludeAntPatterns;
     }
 
     public String getNonceParameterName() {
@@ -75,6 +73,41 @@ public class EnigmaProperties {
 
     public void setMaxAllowedTimestampDiff(Duration maxAllowedTimestampDiff) {
         this.maxAllowedTimestampDiff = maxAllowedTimestampDiff;
+    }
+
+    public Interceptor getInterceptor() {
+        return interceptor;
+    }
+
+    public void setInterceptor(Interceptor interceptor) {
+        this.interceptor = interceptor;
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+
+    /**
+     * @since 0.0.2
+     */
+    public static class Interceptor {
+        private int order = Ordered.LOWEST_PRECEDENCE;
+
+        private Set<String> excludeAntPatterns;
+
+        public int getOrder() {
+            return order;
+        }
+
+        public void setOrder(int order) {
+            this.order = order;
+        }
+
+        public Set<String> getExcludeAntPatterns() {
+            return excludeAntPatterns;
+        }
+
+        public void setExcludeAntPatterns(Set<String> excludeAntPatterns) {
+            this.excludeAntPatterns = excludeAntPatterns;
+        }
     }
 
 }

@@ -36,18 +36,14 @@ public class EnigmaAutoConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        if (!properties.isEnabled()) {
-            return;
-        }
-
         final EnigmaInterceptor interceptor = new EnigmaInterceptor();
         Optional.ofNullable(algorithm).ifPresent(interceptor::setAlgorithm);
-        Optional.ofNullable(properties.getExcludeAntPatterns()).ifPresent(interceptor::setExcludeAntPatterns);
+        Optional.ofNullable(properties.getInterceptor().getExcludeAntPatterns()).ifPresent(interceptor::setExcludeAntPatterns);
         Optional.ofNullable(properties.getSignParameterName()).ifPresent(interceptor::setSignParameterName);
         Optional.ofNullable(properties.getNonceParameterName()).ifPresent(interceptor::setNonceParameterName);
         Optional.ofNullable(properties.getTimestampParameterName()).ifPresent(interceptor::setTimestampParameterName);
         Optional.ofNullable(properties.getMaxAllowedTimestampDiff()).ifPresent(interceptor::setMaxAllowedTimestampDiff);
-        registry.addInterceptor(interceptor);
+        registry.addInterceptor(interceptor).order(properties.getInterceptor().getOrder());
     }
 
 }

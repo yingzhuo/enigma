@@ -11,6 +11,9 @@ import enigma.Enigma;
 import enigma.EnigmaAlgorithm;
 import enigma.EnigmaIgnored;
 import enigma.exception.EnigmaException;
+import enigma.exception.InvalidRequestException;
+import enigma.exception.InvalidSignException;
+import enigma.exception.InvalidTimestampException;
 import enigma.impl.DefaultEnigmaAlgorithm;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -65,11 +68,12 @@ public class EnigmaInterceptor implements HandlerInterceptor {
 
         final Enigma enigma = resolve(request).orElse(null);
         if (enigma == null) {
-            throw new EnigmaException("bad request");
+            throw new InvalidRequestException("invalid request");
         }
 
         final String parametersAsString = flatAndSort(request.getParameterMap(), signParameterName);
         log.debug("parameters = {}", parametersAsString);
+
         final String hashed = algorithm.encode(parametersAsString);
         log.debug("hashed-parameters = {}", hashed);
 
@@ -78,14 +82,14 @@ public class EnigmaInterceptor implements HandlerInterceptor {
         log.debug("sign = {}", sign);
 
         if (!StringUtils.equals(hashed, sign)) {
-            throw new EnigmaException("invalid sign");
+            throw new InvalidSignException("invalid sign");
         }
 
         // 检查时间戳
         if (maxAllowedTimestampDiff != null) {
             long diff = Math.abs(System.currentTimeMillis() - enigma.getTimestamp());
             if (diff > maxAllowedTimestampDiff.toMillis()) {
-                throw new EnigmaException("invalid timestamp");
+                throw new InvalidTimestampException("invalid timestamp");
             }
         } else {
             log.debug("timestamp-checking is ignored");
@@ -100,7 +104,12 @@ public class EnigmaInterceptor implements HandlerInterceptor {
         Long timestamp = string2Long(request.getParameter(timestampParameterName));
         String sign = request.getParameter(signParameterName);
 
-        if (nonce == null || timestamp == null || sign == null) {
+        // since 0.0.2
+        if (isTimestampCheckingDisabled() && timestamp == null) {
+            timestamp = -1L;
+        }
+
+        if (nonce == null || sign == null || timestamp == null) {
             return Optional.empty();
         }
 
@@ -136,7 +145,7 @@ public class EnigmaInterceptor implements HandlerInterceptor {
 
     private Long string2Long(String s) {
         try {
-            return Long.parseLong(s);
+            return Math.abs(Long.parseLong(s));
         } catch (NumberFormatException e) {
             return null;
         }
@@ -149,6 +158,10 @@ public class EnigmaInterceptor implements HandlerInterceptor {
                     handlerMethod.getBeanType().getAnnotation(IGNORED) != null;
         }
         return false;
+    }
+
+    private boolean isTimestampCheckingDisabled() {
+        return this.maxAllowedTimestampDiff == null;
     }
 
     public void setExcludeAntPatterns(Set<String> excludeAntPatterns) {

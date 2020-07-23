@@ -13,7 +13,7 @@ import java.io.Serializable;
  * @author 应卓
  * @since 0.0.1
  */
-public class Enigma implements Serializable {
+public final class Enigma implements Serializable {
 
     private String sign;
     private Long timestamp;
