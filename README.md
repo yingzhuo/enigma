@@ -2,6 +2,16 @@
 
 处于安全方面的考虑，客户端访问服务器的API时，考虑对参数进行验证。本项目提供此功能。
 
+### 下载
+
+```xml
+<dependency>
+    <groupId>com.github.yingzhuo</groupId>
+    <artifactId>enigma</artifactId>
+    <version>0.0.1</version>
+</dependency>
+```
+
 ### 与spring-boot集成
 
 ```yaml
@@ -19,7 +29,8 @@ enigma:
 
 * (2) timestamp-parameter-name
 
-请求发送发时的时间戳，long型数。值应当为`1970-01-01 00:00:00 UTC`到当前时间所经历的毫秒数。
+请求发送发时的时间戳，long型数。值应当为`1970-01-01 00:00:00 UTC`到当前时间所经历的毫秒数。如果配置了`max-allowed-timestamp-diff`
+服务器会检查服务器的当前时间与请求发出时相差是不是超过了`max-allowed-timestamp-diff`指定的跨度，如果超过了，请求会被拒绝。
 
 * (3) sign-parameter-name
 
