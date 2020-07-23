@@ -87,6 +87,8 @@ public class EnigmaInterceptor implements HandlerInterceptor {
             if (diff > maxAllowedTimestampDiff.toMillis()) {
                 throw new EnigmaException("invalid timestamp");
             }
+        } else {
+            log.debug("timestamp-checking is ignored");
         }
 
         return true;
@@ -102,7 +104,7 @@ public class EnigmaInterceptor implements HandlerInterceptor {
             return Optional.empty();
         }
 
-        Enigma enigma = new Enigma();
+        final Enigma enigma = new Enigma();
         enigma.setNonce(nonce);
         enigma.setTimestamp(timestamp);
         enigma.setSign(sign);
@@ -110,8 +112,7 @@ public class EnigmaInterceptor implements HandlerInterceptor {
     }
 
     private String flatAndSort(Map<String, String[]> source, String signParameterName) {
-
-        StringBuilder stringBuilder = new StringBuilder();
+        final StringBuilder stringBuilder = new StringBuilder();
 
         for (String key : new TreeSet<>(source.keySet())) {
 

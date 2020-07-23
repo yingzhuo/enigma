@@ -307,13 +307,6 @@
                 <version>1.2.3</version>
             </dependency>
 
-            <!-- yaml -->
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>1.26</version>
-            </dependency>
-
             <!-- commons -->
             <dependency>
                 <groupId>org.apache.commons</groupId>

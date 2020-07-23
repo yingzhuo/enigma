@@ -18,8 +18,7 @@ public class DefaultEnigmaAlgorithm implements EnigmaAlgorithm {
 
     @Override
     public String encode(String parametersAsString) {
-        String s = DigestUtils.md5Hex(parametersAsString);
-        return DigestUtils.sha256Hex(s);
+        return DigestUtils.sha256Hex(DigestUtils.md5Hex(parametersAsString));
     }
 
 }
