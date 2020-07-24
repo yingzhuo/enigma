@@ -12,7 +12,7 @@
 <dependency>
     <groupId>com.github.yingzhuo</groupId>
     <artifactId>enigma</artifactId>
-    <version>0.0.3</version>
+    <version>${enigma.version}</version>
 </dependency>
 ```
 
