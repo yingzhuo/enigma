@@ -11,8 +11,6 @@ import enigma.EnigmaAlgorithm;
 import enigma.core.EnigmaInterceptor;
 import enigma.mvc.EnigmaHandlerMethodArgumentResolver;
 import enigma.properties.EnigmaProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -33,8 +31,6 @@ import java.util.Optional;
 @ConditionalOnProperty(prefix = "enigma", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class EnigmaAutoConfiguration implements WebMvcConfigurer {
 
-    private static final Logger log = LoggerFactory.getLogger(EnigmaAutoConfiguration.class);
-
     @Autowired
     private EnigmaProperties properties;
 
@@ -45,29 +41,22 @@ public class EnigmaAutoConfiguration implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         final EnigmaInterceptor interceptor = new EnigmaInterceptor();
         Optional.ofNullable(algorithm).ifPresent(interceptor::setAlgorithm);
-
         Optional.ofNullable(properties.getInterceptor().getExcludeAntPatterns()).ifPresent(interceptor::setExcludeAntPatterns);
-
         Optional.ofNullable(properties.getResolver().getSignParameterName()).ifPresent(interceptor::setSignParameterName);
         Optional.ofNullable(properties.getResolver().getNonceParameterName()).ifPresent(interceptor::setNonceParameterName);
         Optional.ofNullable(properties.getResolver().getTimestampParameterName()).ifPresent(interceptor::setTimestampParameterName);
-
         Optional.ofNullable(properties.getMaxAllowedTimestampDiff()).ifPresent(interceptor::setMaxAllowedTimestampDiff);
-
         Optional.ofNullable(properties.getResolver().getSignHeaderName()).ifPresent(interceptor::setSignHeaderName);
         Optional.ofNullable(properties.getResolver().getNonceHeaderName()).ifPresent(interceptor::setNonceHeaderName);
         Optional.ofNullable(properties.getResolver().getTimestampHeaderName()).ifPresent(interceptor::setTimestampHeaderName);
+        interceptor.setDebugMode(properties.isDebugMode());
         registry.addInterceptor(interceptor).order(properties.getInterceptor().getOrder());
-
-        log.debug("{} registered", EnigmaInterceptor.class.getSimpleName());
     }
 
     // since 0.0.3
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
         resolvers.add(new EnigmaHandlerMethodArgumentResolver());
-
-        log.debug("{} added", EnigmaHandlerMethodArgumentResolver.class.getSimpleName());
     }
 
 }

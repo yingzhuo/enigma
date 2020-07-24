@@ -52,9 +52,15 @@ public final class Enigma implements Serializable {
         this.nonce = nonce;
     }
 
+    public boolean isValid() {
+        return nonce != null &&
+                sign != null &&
+                timestamp != null;
+    }
+
     @Override
     public String toString() {
-        return "Enigma{" +
+        return "{" +
                 "sign='" + sign + '\'' +
                 ", timestamp=" + timestamp +
                 ", nonce='" + nonce + '\'' +

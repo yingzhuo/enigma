@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.time.Duration;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -38,7 +37,7 @@ import java.util.TreeSet;
  */
 public class EnigmaInterceptor implements HandlerInterceptor {
 
-    private static final Logger log = LoggerFactory.getLogger(EnigmaInterceptor.class);
+    private static final Logger log = LoggerFactory.getLogger("enigma");
     private static final Class<EnigmaIgnored> IGNORED = EnigmaIgnored.class;
 
     private final PathMatcher pathMatcher = new AntPathMatcher();
@@ -51,6 +50,7 @@ public class EnigmaInterceptor implements HandlerInterceptor {
     private String timestampHeaderName = "X-Enigma-Timestamp";
     private String signHeaderName = "X-Enigma-Sign";
     private Duration maxAllowedTimestampDiff = null;
+    private boolean debugMode = false;
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) {
@@ -66,66 +66,70 @@ public class EnigmaInterceptor implements HandlerInterceptor {
         if (excludeAntPatterns != null && !excludeAntPatterns.isEmpty()) {
             boolean skip = excludeAntPatterns.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
             if (skip) {
-                log.debug("{} skipped", path);
                 return true;
             }
         }
 
         if (this.skipByAnnotation(handler)) {
-            log.debug("{} skipped by annotation @EnigmaIgnored", path);
             return true;
         }
 
-        final Enigma enigma = resolve(request).orElse(null);
-        if (enigma == null) {
+        final Enigma enigma = resolve(request);
+        if (!enigma.isValid()) {
+            if (debugMode) {
+                log.warn("Invalid enigma's instance");
+                log.warn("enigma = {}", enigma);
+                return true;
+            }
             throw new InvalidRequestException("invalid request");
         } else {
-            log.debug("enigma context setting");
             EnigmaContext.set(enigma);
         }
 
         final String parametersAsString = flatAndSort(request.getParameterMap(), signParameterName);
-        log.debug("parameters = {}", parametersAsString);
-
         final String hashed = algorithm.encode(parametersAsString);
-        log.debug("hashed-parameters = {}", hashed);
 
         // 检查签名
         final String sign = enigma.getSign();
-        log.debug("sign = {}", sign);
 
         if (!StringUtils.equals(hashed, sign)) {
+            if (debugMode) {
+                log.warn("invalid sign");
+                log.warn("actual-sign = {}", sign);
+                log.warn("expected-sign = {}", hashed);
+                return true;
+            }
             throw new InvalidSignException("invalid sign");
         }
 
         // 检查时间戳
         if (maxAllowedTimestampDiff != null) {
-            long diff = Math.abs(System.currentTimeMillis() - enigma.getTimestamp());
+            long now = System.currentTimeMillis();
+            long diff = Math.abs(now - enigma.getTimestamp());
             if (diff > maxAllowedTimestampDiff.toMillis()) {
+                if (debugMode) {
+                    log.warn("invalid timestamp");
+                    log.warn("actual-timestamp = {}", enigma.getTimestamp());
+                    log.warn("server-timestamp = {}", now);
+                    return true;
+                }
                 throw new InvalidTimestampException("invalid timestamp");
             }
-        } else {
-            log.debug("timestamp-checking is ignored");
         }
-
         return true;
     }
 
-    public Optional<Enigma> resolve(HttpServletRequest request) {
+    public Enigma resolve(HttpServletRequest request) {
 
         String nonce = resolveNonce(request);
         Long timestamp = resolveTimestamp(request);
         String sign = resolveSign(request);
 
-        if (nonce == null || sign == null || timestamp == null) {
-            return Optional.empty();
-        }
-
         final Enigma enigma = new Enigma();
         enigma.setNonce(nonce);
         enigma.setTimestamp(timestamp);
         enigma.setSign(sign);
-        return Optional.of(enigma);
+        return enigma;
     }
 
     private String resolveNonce(HttpServletRequest request) {
@@ -243,6 +247,10 @@ public class EnigmaInterceptor implements HandlerInterceptor {
 
     public void setSignHeaderName(String signHeaderName) {
         this.signHeaderName = signHeaderName;
+    }
+
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
     }
 
 }

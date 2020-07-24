@@ -7,13 +7,20 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 package enigma;
 
+import java.util.function.Function;
+
 /**
  * @author 应卓
  * @since 0.0.1
  */
 @FunctionalInterface
-public interface EnigmaAlgorithm {
+public interface EnigmaAlgorithm extends Function<String, String> {
 
     public String encode(String parametersAsString);
+
+    @Override
+    public default String apply(String parametersAsString) {
+        return encode(parametersAsString);
+    }
 
 }

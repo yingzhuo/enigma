@@ -32,6 +32,8 @@ public class EnigmaProperties implements Serializable {
 
     private EnigmaResolverProperties resolver = new EnigmaResolverProperties();
 
+    private boolean debugMode = false;
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -64,6 +66,16 @@ public class EnigmaProperties implements Serializable {
         this.resolver = enigmaResolverProperties;
     }
 
+    public boolean isDebugMode() {
+        return debugMode;
+    }
+
+    public void setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+
     public static class EnigmaInterceptorProperties implements Serializable {
 
         private int order = Ordered.LOWEST_PRECEDENCE;
@@ -88,6 +100,8 @@ public class EnigmaProperties implements Serializable {
             this.excludeAntPatterns = excludeAntPatterns;
         }
     }
+
+    // ----------------------------------------------------------------------------------------------------------------
 
     public static class EnigmaResolverProperties implements Serializable {
 
@@ -148,6 +162,7 @@ public class EnigmaProperties implements Serializable {
         public void setSignHeaderName(String signHeaderName) {
             this.signHeaderName = signHeaderName;
         }
+
     }
 
 }

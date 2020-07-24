@@ -17,10 +17,10 @@ import java.util.Optional;
  */
 public final class EnigmaContext {
 
+    private static final ThreadLocal<Enigma> HOLDER = ThreadLocal.withInitial(() -> null);
+
     private EnigmaContext() {
     }
-
-    private static final ThreadLocal<Enigma> HOLDER = ThreadLocal.withInitial(() -> null);
 
     static void set(Enigma enigma) {
         HOLDER.set(enigma);
