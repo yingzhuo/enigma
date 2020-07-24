@@ -22,6 +22,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -49,7 +50,13 @@ public class EnigmaInterceptor implements HandlerInterceptor {
     private Duration maxAllowedTimestampDiff = null;
 
     @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) {
+        EnigmaContext.remove();
+    }
+
+    @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws EnigmaException {
+        EnigmaContext.remove();
 
         final String path = request.getRequestURI();
 
@@ -69,6 +76,9 @@ public class EnigmaInterceptor implements HandlerInterceptor {
         final Enigma enigma = resolve(request).orElse(null);
         if (enigma == null) {
             throw new InvalidRequestException("invalid request");
+        } else {
+            log.debug("enigma context setting");
+            EnigmaContext.set(enigma);
         }
 
         final String parametersAsString = flatAndSort(request.getParameterMap(), signParameterName);
