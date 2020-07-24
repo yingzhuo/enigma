@@ -125,7 +125,6 @@ public class EnigmaInterceptor implements HandlerInterceptor {
     }
 
     public Enigma resolve(HttpServletRequest request) {
-
         String nonce = resolveNonce(request);
         Long timestamp = resolveTimestamp(request);
         String sign = resolveSign(request);
@@ -145,7 +144,7 @@ public class EnigmaInterceptor implements HandlerInterceptor {
         if (value == null && nonceHeaderName != null) {
             value = request.getHeader(nonceHeaderName);
         }
-        return value;
+        return StringUtils.defaultIfBlank(value, null);
     }
 
     private Long resolveTimestamp(HttpServletRequest request) {
@@ -171,7 +170,7 @@ public class EnigmaInterceptor implements HandlerInterceptor {
         if (value == null && signHeaderName != null) {
             value = request.getHeader(signHeaderName);
         }
-        return value;
+        return StringUtils.defaultIfBlank(value, null);
     }
 
     private String flatAndSort(Map<String, String[]> source, String signParameterName) {
