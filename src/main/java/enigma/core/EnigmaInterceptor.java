@@ -77,7 +77,7 @@ public class EnigmaInterceptor implements HandlerInterceptor {
         if (!enigma.isValid()) {
 
             if (debugMode) {
-                log.warn("Invalid enigma's instance");
+                log.warn("invalid enigma's instance");
                 log.warn("enigma = {}", enigma);
                 return true;
             } else {
