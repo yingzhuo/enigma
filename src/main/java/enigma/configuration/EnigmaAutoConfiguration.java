@@ -45,11 +45,18 @@ public class EnigmaAutoConfiguration implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         final EnigmaInterceptor interceptor = new EnigmaInterceptor();
         Optional.ofNullable(algorithm).ifPresent(interceptor::setAlgorithm);
+
         Optional.ofNullable(properties.getInterceptor().getExcludeAntPatterns()).ifPresent(interceptor::setExcludeAntPatterns);
-        Optional.ofNullable(properties.getSignParameterName()).ifPresent(interceptor::setSignParameterName);
-        Optional.ofNullable(properties.getNonceParameterName()).ifPresent(interceptor::setNonceParameterName);
-        Optional.ofNullable(properties.getTimestampParameterName()).ifPresent(interceptor::setTimestampParameterName);
+
+        Optional.ofNullable(properties.getResolver().getSignParameterName()).ifPresent(interceptor::setSignParameterName);
+        Optional.ofNullable(properties.getResolver().getNonceParameterName()).ifPresent(interceptor::setNonceParameterName);
+        Optional.ofNullable(properties.getResolver().getTimestampParameterName()).ifPresent(interceptor::setTimestampParameterName);
+
         Optional.ofNullable(properties.getMaxAllowedTimestampDiff()).ifPresent(interceptor::setMaxAllowedTimestampDiff);
+
+        Optional.ofNullable(properties.getResolver().getSignHeaderName()).ifPresent(interceptor::setSignHeaderName);
+        Optional.ofNullable(properties.getResolver().getNonceHeaderName()).ifPresent(interceptor::setNonceHeaderName);
+        Optional.ofNullable(properties.getResolver().getTimestampHeaderName()).ifPresent(interceptor::setTimestampHeaderName);
         registry.addInterceptor(interceptor).order(properties.getInterceptor().getOrder());
 
         log.debug("{} registered", EnigmaInterceptor.class.getSimpleName());

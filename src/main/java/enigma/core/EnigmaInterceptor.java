@@ -47,6 +47,9 @@ public class EnigmaInterceptor implements HandlerInterceptor {
     private String nonceParameterName = "_nonce";
     private String timestampParameterName = "_timestamp";
     private String signParameterName = "_sign";
+    private String nonceHeaderName = "X-Enigma-Nonce";
+    private String timestampHeaderName = "X-Enigma-Timestamp";
+    private String signHeaderName = "X-Enigma-Sign";
     private Duration maxAllowedTimestampDiff = null;
 
     @Override
@@ -110,14 +113,9 @@ public class EnigmaInterceptor implements HandlerInterceptor {
 
     public Optional<Enigma> resolve(HttpServletRequest request) {
 
-        String nonce = request.getParameter(nonceParameterName);
-        Long timestamp = string2Long(request.getParameter(timestampParameterName));
-        String sign = request.getParameter(signParameterName);
-
-        // since 0.0.2
-        if (isTimestampCheckingDisabled() && timestamp == null) {
-            timestamp = -1L;
-        }
+        String nonce = resolveNonce(request);
+        Long timestamp = resolveTimestamp(request);
+        String sign = resolveSign(request);
 
         if (nonce == null || sign == null || timestamp == null) {
             return Optional.empty();
@@ -128,6 +126,43 @@ public class EnigmaInterceptor implements HandlerInterceptor {
         enigma.setTimestamp(timestamp);
         enigma.setSign(sign);
         return Optional.of(enigma);
+    }
+
+    private String resolveNonce(HttpServletRequest request) {
+        String value = null;
+        if (nonceParameterName != null) {
+            value = request.getParameter(nonceParameterName);
+        }
+        if (value == null && nonceHeaderName != null) {
+            value = request.getHeader(nonceHeaderName);
+        }
+        return value;
+    }
+
+    private Long resolveTimestamp(HttpServletRequest request) {
+        Long value = null;
+        if (timestampParameterName != null) {
+            value = string2Long(request.getParameter(timestampParameterName));
+        }
+        if (value == null && timestampHeaderName != null) {
+            value = string2Long(request.getHeader(timestampHeaderName));
+        }
+        // since 0.0.2
+        if (isTimestampCheckingDisabled() && value == null) {
+            value = -1L;
+        }
+        return value;
+    }
+
+    private String resolveSign(HttpServletRequest request) {
+        String value = null;
+        if (signParameterName != null) {
+            value = request.getParameter(signParameterName);
+        }
+        if (value == null && signHeaderName != null) {
+            value = request.getHeader(signHeaderName);
+        }
+        return value;
     }
 
     private String flatAndSort(Map<String, String[]> source, String signParameterName) {
@@ -196,6 +231,18 @@ public class EnigmaInterceptor implements HandlerInterceptor {
 
     public void setMaxAllowedTimestampDiff(Duration maxAllowedTimestampDiff) {
         this.maxAllowedTimestampDiff = maxAllowedTimestampDiff;
+    }
+
+    public void setNonceHeaderName(String nonceHeaderName) {
+        this.nonceHeaderName = nonceHeaderName;
+    }
+
+    public void setTimestampHeaderName(String timestampHeaderName) {
+        this.timestampHeaderName = timestampHeaderName;
+    }
+
+    public void setSignHeaderName(String signHeaderName) {
+        this.signHeaderName = signHeaderName;
     }
 
 }

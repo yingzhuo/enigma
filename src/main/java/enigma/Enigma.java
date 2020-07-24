@@ -51,4 +51,14 @@ public final class Enigma implements Serializable {
     public void setNonce(String nonce) {
         this.nonce = nonce;
     }
+
+    @Override
+    public String toString() {
+        return "Enigma{" +
+                "sign='" + sign + '\'' +
+                ", timestamp=" + timestamp +
+                ", nonce='" + nonce + '\'' +
+                '}';
+    }
+
 }

@@ -11,6 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.convert.DurationUnit;
 import org.springframework.core.Ordered;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Set;
@@ -20,20 +21,16 @@ import java.util.Set;
  * @since 0.0.1
  */
 @ConfigurationProperties(prefix = "enigma")
-public class EnigmaProperties {
+public class EnigmaProperties implements Serializable {
 
     private boolean enabled = true;
-
-    private String nonceParameterName = "_nonce";
-
-    private String timestampParameterName = "_timestamp";
-
-    private String signParameterName = "_sign";
 
     @DurationUnit(ChronoUnit.MINUTES)
     private Duration maxAllowedTimestampDiff = null;
 
-    private Interceptor interceptor = new Interceptor();
+    private EnigmaInterceptorProperties interceptor = new EnigmaInterceptorProperties();
+
+    private EnigmaResolverProperties resolver = new EnigmaResolverProperties();
 
     public boolean isEnabled() {
         return enabled;
@@ -41,30 +38,6 @@ public class EnigmaProperties {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-
-    public String getNonceParameterName() {
-        return nonceParameterName;
-    }
-
-    public void setNonceParameterName(String nonceParameterName) {
-        this.nonceParameterName = nonceParameterName;
-    }
-
-    public String getTimestampParameterName() {
-        return timestampParameterName;
-    }
-
-    public void setTimestampParameterName(String timestampParameterName) {
-        this.timestampParameterName = timestampParameterName;
-    }
-
-    public String getSignParameterName() {
-        return signParameterName;
-    }
-
-    public void setSignParameterName(String signParameterName) {
-        this.signParameterName = signParameterName;
     }
 
     public Duration getMaxAllowedTimestampDiff() {
@@ -75,23 +48,29 @@ public class EnigmaProperties {
         this.maxAllowedTimestampDiff = maxAllowedTimestampDiff;
     }
 
-    public Interceptor getInterceptor() {
+    public EnigmaInterceptorProperties getInterceptor() {
         return interceptor;
     }
 
-    public void setInterceptor(Interceptor interceptor) {
-        this.interceptor = interceptor;
+    public void setInterceptor(EnigmaInterceptorProperties enigmaInterceptorProperties) {
+        this.interceptor = enigmaInterceptorProperties;
     }
 
-    // ----------------------------------------------------------------------------------------------------------------
+    public EnigmaResolverProperties getResolver() {
+        return resolver;
+    }
 
-    /**
-     * @since 0.0.2
-     */
-    public static class Interceptor {
+    public void setResolver(EnigmaResolverProperties enigmaResolverProperties) {
+        this.resolver = enigmaResolverProperties;
+    }
+
+    public static class EnigmaInterceptorProperties implements Serializable {
+
         private int order = Ordered.LOWEST_PRECEDENCE;
-
         private Set<String> excludeAntPatterns;
+
+        public EnigmaInterceptorProperties() {
+        }
 
         public int getOrder() {
             return order;
@@ -107,6 +86,67 @@ public class EnigmaProperties {
 
         public void setExcludeAntPatterns(Set<String> excludeAntPatterns) {
             this.excludeAntPatterns = excludeAntPatterns;
+        }
+    }
+
+    public static class EnigmaResolverProperties implements Serializable {
+
+        private String nonceParameterName = "_nonce";
+        private String timestampParameterName = "_timestamp";
+        private String signParameterName = "_sign";
+        private String nonceHeaderName = "X-Enigma-Nonce";
+        private String timestampHeaderName = "X-Enigma-Timestamp";
+        private String signHeaderName = "X-Enigma-Sign";
+
+        public EnigmaResolverProperties() {
+        }
+
+        public String getNonceParameterName() {
+            return nonceParameterName;
+        }
+
+        public void setNonceParameterName(String nonceParameterName) {
+            this.nonceParameterName = nonceParameterName;
+        }
+
+        public String getTimestampParameterName() {
+            return timestampParameterName;
+        }
+
+        public void setTimestampParameterName(String timestampParameterName) {
+            this.timestampParameterName = timestampParameterName;
+        }
+
+        public String getSignParameterName() {
+            return signParameterName;
+        }
+
+        public void setSignParameterName(String signParameterName) {
+            this.signParameterName = signParameterName;
+        }
+
+        public String getNonceHeaderName() {
+            return nonceHeaderName;
+        }
+
+        public void setNonceHeaderName(String nonceHeaderName) {
+            this.nonceHeaderName = nonceHeaderName;
+        }
+
+        public String getTimestampHeaderName() {
+            return timestampHeaderName;
+        }
+
+        public void setTimestampHeaderName(String timestampHeaderName) {
+            this.timestampHeaderName = timestampHeaderName;
+        }
+
+        public String getSignHeaderName() {
+            return signHeaderName;
+        }
+
+        public void setSignHeaderName(String signHeaderName) {
+            this.signHeaderName = signHeaderName;
         }
     }
 
