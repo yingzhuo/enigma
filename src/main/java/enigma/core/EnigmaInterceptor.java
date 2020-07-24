@@ -10,11 +10,11 @@ package enigma.core;
 import enigma.Enigma;
 import enigma.EnigmaAlgorithm;
 import enigma.EnigmaIgnored;
+import enigma.algorithm.DefaultEnigmaAlgorithm;
 import enigma.exception.EnigmaException;
 import enigma.exception.InvalidRequestException;
 import enigma.exception.InvalidSignException;
 import enigma.exception.InvalidTimestampException;
-import enigma.impl.DefaultEnigmaAlgorithm;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,17 +39,16 @@ public class EnigmaInterceptor implements HandlerInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger("enigma");
     private static final Class<EnigmaIgnored> IGNORED = EnigmaIgnored.class;
-
     private final PathMatcher pathMatcher = new AntPathMatcher();
-    private Set<String> excludeAntPatterns;
     private EnigmaAlgorithm algorithm = new DefaultEnigmaAlgorithm();
-    private String nonceParameterName = "_nonce";
-    private String timestampParameterName = "_timestamp";
-    private String signParameterName = "_sign";
-    private String nonceHeaderName = "X-Enigma-Nonce";
-    private String timestampHeaderName = "X-Enigma-Timestamp";
-    private String signHeaderName = "X-Enigma-Sign";
-    private Duration maxAllowedTimestampDiff = null;
+    private Set<String> excludeAntPatterns;
+    private String nonceParameterName;
+    private String timestampParameterName;
+    private String signParameterName;
+    private String nonceHeaderName;
+    private String timestampHeaderName;
+    private String signHeaderName;
+    private Duration maxAllowedTimestampDiff;
     private boolean debugMode = false;
 
     @Override
@@ -76,30 +75,34 @@ public class EnigmaInterceptor implements HandlerInterceptor {
 
         final Enigma enigma = resolve(request);
         if (!enigma.isValid()) {
+
             if (debugMode) {
                 log.warn("Invalid enigma's instance");
                 log.warn("enigma = {}", enigma);
                 return true;
+            } else {
+                throw new InvalidRequestException("invalid request");
             }
-            throw new InvalidRequestException("invalid request");
+
         } else {
             EnigmaContext.set(enigma);
         }
 
         final String parametersAsString = flatAndSort(request.getParameterMap(), signParameterName);
-        final String hashed = algorithm.encode(parametersAsString);
+        final String hashedParameters = algorithm.encode(parametersAsString);
 
         // 检查签名
         final String sign = enigma.getSign();
 
-        if (!StringUtils.equals(hashed, sign)) {
+        if (!algorithm.matches(hashedParameters, sign)) {
             if (debugMode) {
                 log.warn("invalid sign");
                 log.warn("actual-sign = {}", sign);
-                log.warn("expected-sign = {}", hashed);
+                log.warn("expected-sign = {}", hashedParameters);
                 return true;
+            } else {
+                throw new InvalidSignException("invalid sign");
             }
-            throw new InvalidSignException("invalid sign");
         }
 
         // 检查时间戳
@@ -112,10 +115,12 @@ public class EnigmaInterceptor implements HandlerInterceptor {
                     log.warn("actual-timestamp = {}", enigma.getTimestamp());
                     log.warn("server-timestamp = {}", now);
                     return true;
+                } else {
+                    throw new InvalidTimestampException("invalid timestamp");
                 }
-                throw new InvalidTimestampException("invalid timestamp");
             }
         }
+
         return true;
     }
 
@@ -174,7 +179,7 @@ public class EnigmaInterceptor implements HandlerInterceptor {
 
         for (String key : new TreeSet<>(source.keySet())) {
 
-            if (signParameterName.equals(key)) {
+            if (signParameterName != null && signParameterName.equals(key)) {
                 continue;
             }
 

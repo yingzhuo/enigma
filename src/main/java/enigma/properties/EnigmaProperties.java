@@ -108,9 +108,9 @@ public class EnigmaProperties implements Serializable {
         private String nonceParameterName = "_nonce";
         private String timestampParameterName = "_timestamp";
         private String signParameterName = "_sign";
-        private String nonceHeaderName = "X-Enigma-Nonce";
-        private String timestampHeaderName = "X-Enigma-Timestamp";
-        private String signHeaderName = "X-Enigma-Sign";
+        private String nonceHeaderName = null;
+        private String timestampHeaderName = null;
+        private String signHeaderName = null;
 
         public EnigmaResolverProperties() {
         }
@@ -162,7 +162,6 @@ public class EnigmaProperties implements Serializable {
         public void setSignHeaderName(String signHeaderName) {
             this.signHeaderName = signHeaderName;
         }
-
     }
 
 }

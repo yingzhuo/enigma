@@ -5,10 +5,11 @@
  *  \___|_| |_|_|\__, |_| |_| |_|\__,_|
  *              |___/      https://github.com/yingzhuo/enigma
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-package enigma.impl;
+package enigma.algorithm;
 
 import enigma.EnigmaAlgorithm;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author 应卓
@@ -19,6 +20,11 @@ public class DefaultEnigmaAlgorithm implements EnigmaAlgorithm {
     @Override
     public String encode(String parametersAsString) {
         return DigestUtils.sha256Hex(DigestUtils.md5Hex(parametersAsString));
+    }
+
+    @Override
+    public boolean matches(String hashedParameters, String sign) {
+        return StringUtils.equalsIgnoreCase(hashedParameters, sign);
     }
 
 }
