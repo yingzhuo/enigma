@@ -11,6 +11,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
+ * (内部工具)
+ *
  * @author 应卓
  * @since 1.0.1
  */

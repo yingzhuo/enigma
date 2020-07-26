@@ -14,6 +14,7 @@ import enigma.exception.EnigmaException;
 import enigma.exception.InvalidRequestException;
 import enigma.exception.InvalidSignException;
 import enigma.exception.InvalidTimestampException;
+import enigma.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.AntPathMatcher;
@@ -105,7 +106,7 @@ public class EnigmaInterceptor implements HandlerInterceptor {
         }
 
         // 检查时间戳
-        if (maxAllowedTimestampDiff != null) {
+        if (!isTimestampCheckingDisabled()) {
             long now = System.currentTimeMillis();
             long diff = Math.abs(now - enigma.getTimestamp());
             if (diff > maxAllowedTimestampDiff.toMillis()) {
@@ -137,21 +138,21 @@ public class EnigmaInterceptor implements HandlerInterceptor {
 
     private String resolveNonce(HttpServletRequest request) {
         String value = null;
-        if (nonceParameterName != null) {
-            value = request.getParameter(nonceParameterName);
+        if (StringUtils.isNotBlank(nonceParameterName)) {
+            value = StringUtils.blankToNull(request.getParameter(nonceParameterName));
         }
-        if (value == null && nonceHeaderName != null) {
-            value = request.getHeader(nonceHeaderName);
+        if (value == null && StringUtils.isNotBlank(nonceHeaderName)) {
+            value = StringUtils.blankToNull(request.getHeader(nonceHeaderName));
         }
-        return blankToNull(value);
+        return StringUtils.blankToNull(value);
     }
 
     private Long resolveTimestamp(HttpServletRequest request) {
         Long value = null;
-        if (timestampParameterName != null) {
+        if (StringUtils.isNotBlank(timestampParameterName)) {
             value = string2Long(request.getParameter(timestampParameterName));
         }
-        if (value == null && timestampHeaderName != null) {
+        if (value == null && StringUtils.isNotBlank(timestampHeaderName)) {
             value = string2Long(request.getHeader(timestampHeaderName));
         }
         // since 0.0.2
@@ -163,30 +164,13 @@ public class EnigmaInterceptor implements HandlerInterceptor {
 
     private String resolveSign(HttpServletRequest request) {
         String value = null;
-        if (signParameterName != null) {
-            value = request.getParameter(signParameterName);
+        if (StringUtils.isNotBlank(signParameterName)) {
+            value = StringUtils.blankToNull(request.getParameter(signParameterName));
         }
         if (value == null && signHeaderName != null) {
-            value = request.getHeader(signHeaderName);
+            value = StringUtils.blankToNull(request.getHeader(signHeaderName));
         }
-        return blankToNull(value);
-    }
-
-    private String blankToNull(String s) {
-        if (s == null) return null;
-        if (s.trim().isEmpty()) return null;
-        return s;
-    }
-
-    private String join(String[] values) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < values.length; i++) {
-            stringBuilder.append(values[i]);
-            if (i != values.length - 1) {
-                stringBuilder.append(',');
-            }
-        }
-        return stringBuilder.toString();
+        return StringUtils.blankToNull(value);
     }
 
     private String flatAndSort(Map<String, String[]> source, String signParameterName) {
@@ -199,7 +183,7 @@ public class EnigmaInterceptor implements HandlerInterceptor {
             }
 
             String[] values = source.get(key);
-            String value = join(values);
+            String value = StringUtils.join(values);
             stringBuilder.append(
                     String.format("%s=%s,", key, value)
             );
@@ -214,7 +198,7 @@ public class EnigmaInterceptor implements HandlerInterceptor {
 
     private Long string2Long(String s) {
         try {
-            return Math.abs(Long.parseLong(s));
+            return Long.parseLong(s);
         } catch (NumberFormatException e) {
             return null;
         }
