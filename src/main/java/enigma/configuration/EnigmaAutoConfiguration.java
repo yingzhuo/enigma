@@ -12,7 +12,6 @@ import enigma.core.EnigmaInterceptor;
 import enigma.mvc.EnigmaHandlerMethodArgumentResolver;
 import enigma.properties.EnigmaProperties;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -28,7 +27,6 @@ import java.util.Optional;
  */
 @ConditionalOnWebApplication
 @EnableConfigurationProperties(EnigmaProperties.class)
-@ConditionalOnProperty(prefix = "enigma", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class EnigmaAutoConfiguration implements WebMvcConfigurer {
 
     @Autowired

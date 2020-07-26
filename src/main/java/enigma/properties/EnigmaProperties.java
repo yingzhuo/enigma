@@ -23,24 +23,11 @@ import java.util.Set;
 @ConfigurationProperties(prefix = "enigma")
 public class EnigmaProperties implements Serializable {
 
-    private boolean enabled = true;
-
     @DurationUnit(ChronoUnit.MINUTES)
     private Duration maxAllowedTimestampDiff = null;
-
     private EnigmaInterceptorProperties interceptor = new EnigmaInterceptorProperties();
-
     private EnigmaResolverProperties resolver = new EnigmaResolverProperties();
-
     private boolean debugMode = false;
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
 
     public Duration getMaxAllowedTimestampDiff() {
         return maxAllowedTimestampDiff;

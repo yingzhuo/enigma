@@ -7,9 +7,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 package enigma;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
 import java.io.Serializable;
 
 /**
@@ -54,7 +51,11 @@ public final class Enigma implements Serializable {
 
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this, ToStringStyle.JSON_STYLE);
+        return "Enigma{" +
+                "sign='" + sign + '\'' +
+                ", timestamp=" + timestamp +
+                ", nonce='" + nonce + '\'' +
+                '}';
     }
 
 }

@@ -7,15 +7,26 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 package enigma;
 
+import enigma.util.DigestUtils;
+
 /**
  * @author 应卓
  * @since 0.0.1
  */
 public interface EnigmaAlgorithm {
 
-    public String encode(String parametersAsString);
+    public static EnigmaAlgorithm getDefault() {
+        return new EnigmaAlgorithm() {
+        };
+    }
 
-    // since 0.0.6
-    public boolean matches(String hashedParameters, String sign);
+    public default String encode(String parametersAsString) {
+        return DigestUtils.sha256(DigestUtils.md5(parametersAsString));
+    }
+
+    public default boolean matches(String hashedParameters, String sign) {
+        if (hashedParameters == null || sign == null) return false;
+        return hashedParameters.equalsIgnoreCase(sign);
+    }
 
 }

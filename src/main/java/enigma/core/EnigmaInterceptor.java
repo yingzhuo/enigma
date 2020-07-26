@@ -10,12 +10,10 @@ package enigma.core;
 import enigma.Enigma;
 import enigma.EnigmaAlgorithm;
 import enigma.EnigmaIgnored;
-import enigma.algorithm.DefaultEnigmaAlgorithm;
 import enigma.exception.EnigmaException;
 import enigma.exception.InvalidRequestException;
 import enigma.exception.InvalidSignException;
 import enigma.exception.InvalidTimestampException;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.AntPathMatcher;
@@ -38,9 +36,10 @@ import java.util.TreeSet;
 public class EnigmaInterceptor implements HandlerInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger("enigma");
+
     private static final Class<EnigmaIgnored> IGNORED = EnigmaIgnored.class;
     private final PathMatcher pathMatcher = new AntPathMatcher();
-    private EnigmaAlgorithm algorithm = new DefaultEnigmaAlgorithm();
+    private EnigmaAlgorithm algorithm = EnigmaAlgorithm.getDefault();
     private Set<String> excludeAntPatterns;
     private String nonceParameterName;
     private String timestampParameterName;
@@ -144,7 +143,7 @@ public class EnigmaInterceptor implements HandlerInterceptor {
         if (value == null && nonceHeaderName != null) {
             value = request.getHeader(nonceHeaderName);
         }
-        return StringUtils.defaultIfBlank(value, null);
+        return blankToNull(value);
     }
 
     private Long resolveTimestamp(HttpServletRequest request) {
@@ -170,7 +169,24 @@ public class EnigmaInterceptor implements HandlerInterceptor {
         if (value == null && signHeaderName != null) {
             value = request.getHeader(signHeaderName);
         }
-        return StringUtils.defaultIfBlank(value, null);
+        return blankToNull(value);
+    }
+
+    private String blankToNull(String s) {
+        if (s == null) return null;
+        if (s.trim().isEmpty()) return null;
+        return s;
+    }
+
+    private String join(String[] values) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < values.length; i++) {
+            stringBuilder.append(values[i]);
+            if (i != values.length - 1) {
+                stringBuilder.append(',');
+            }
+        }
+        return stringBuilder.toString();
     }
 
     private String flatAndSort(Map<String, String[]> source, String signParameterName) {
@@ -183,7 +199,7 @@ public class EnigmaInterceptor implements HandlerInterceptor {
             }
 
             String[] values = source.get(key);
-            String value = StringUtils.join(values, ",");
+            String value = join(values);
             stringBuilder.append(
                     String.format("%s=%s,", key, value)
             );

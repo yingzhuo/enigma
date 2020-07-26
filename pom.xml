@@ -6,8 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.yingzhuo</groupId>
     <artifactId>enigma</artifactId>
-    <version>1.0.0</version>
-    <packaging>jar</packaging>
+    <version>1.0.1</version>
 
     <name>enigma</name>
     <url>https://github.com/yingzhuo/enigma</url>
@@ -70,7 +69,7 @@
         <java.version>1.8</java.version>
         <kotlin.version>1.3.72</kotlin.version>
 
-        <spring.boot.version>2.3.1.RELEASE</spring.boot.version>
+        <spring.boot.version>2.3.2.RELEASE</spring.boot.version>
         <spring.version>5.2.8.RELEASE</spring.version>
         <spring.seuciryt.version>5.3.3.RELEASE</spring.seuciryt.version>
         <jackson.version>2.11.1</jackson.version>
@@ -314,11 +313,6 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>3.11</version>
             </dependency>
-            <dependency>
-                <groupId>commons-codec</groupId>
-                <artifactId>commons-codec</artifactId>
-                <version>1.14</version>
-            </dependency>
 
             <!-- junit -->
             <dependency>
@@ -353,16 +347,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-        </dependency>
-
-        <!-- commons -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
         </dependency>
 
         <!-- junit -->
@@ -408,7 +392,6 @@
                     <encoding>${encoding}</encoding>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
-                    <compilerArgument>-Xlint:deprecation</compilerArgument>
                 </configuration>
             </plugin>
             <plugin>
